@@ -8,7 +8,10 @@ class vk_auth
 	private $sleeptime = 1;
 	private $minicurl;
 
-	
+/*
+* public functions	
+*/
+
 	function __construct()
 	{
 		$this->email = VKEMAIL;
@@ -31,7 +34,11 @@ class vk_auth
 		return TRUE;
 	}
 
-	public function post_to_user($user_id, $message, $friends_only = '')
+/*
+* public posting functions 
+*/
+
+	public function post_to_user($user_id, $message, $friends_only = FALSE)
 	{
 		// check_auth() - так ли тут нужно? по-моему, нет
 		
@@ -48,21 +55,7 @@ class vk_auth
 			return FALSE;
 		}
 
-		$post = array(
-			'act' => 'post',
-			'al' => '1',
-			'facebook_export' => '',
-			'friends_only' => $friends_only,
-			'hash' => $hash,
-			'message' => $message,
-			'note_title' => '',
-			'official' => '',
-			'status_export' => '',
-			'to_id' => $user_id,
-			'type' => 'feed',
-		);
-
-		if(!$this->post_to_wall_query($post))
+		if(!$this->post_to_wall_query($hash, $user_id, $message, FALSE, $friends_only, 'feed'))
 		{
 			$this->put_error_in_logfile('Message not posted!');
 			return FALSE;
@@ -86,23 +79,9 @@ class vk_auth
 			return FALSE;
 		}
 
-		$official = $official ? '1' : '';
+		$group_id = '-' . $group_id;
 
-		$post = array(
-			'act' => 'post',
-			'al' => '1',
-			'facebook_export' => '',
-			'friends_only' => '',
-			'hash' => $hash,
-			'message' => $message,
-			'note_title' => '',
-			'official' => $official,
-			'status_export' => '',
-			'to_id' => '-' . $group_id,
-			'type' => 'all',
-		);
-
-		if(!$this->post_to_wall_query($post))
+		if(!$this->post_to_wall_query($hash, $group_id, $message, $official, FALSE))
 		{
 			$this->put_error_in_logfile('Message not posted!');
 			return FALSE;
@@ -126,21 +105,9 @@ class vk_auth
 			return FALSE;
 		}
 
-		$post = array(
-			'act' => 'post',
-			'al' => '1',
-			'facebook_export' => '',
-			'friends_only' => '',
-			'hash' => $hash,
-			'message' => $message,
-			'note_title' => '',
-			'official' => '',
-			'status_export' => '',
-			'to_id' => '-' . $page_id,
-			'type' => 'all',
-		);
+		$page_id = '-' . $page_id;
 
-		if(!$this->post_to_wall_query($post))
+		if(!$this->post_to_wall_query($hash, $page_id, $message))
 		{
 			$this->put_error_in_logfile('Message not posted!');
 			return FALSE;
@@ -148,6 +115,20 @@ class vk_auth
 
 		return TRUE;
 	}
+
+/*
+* public other functions
+*/
+
+	public function print_last_error()
+	{
+		$errors = array_reverse(file(LOG_FILE));
+		return '<b>Error!</b><br>' . $errors[0];
+	}
+
+/*
+* private auth functions
+*/
 
 	private function need_auth()
 	{
@@ -175,21 +156,6 @@ class vk_auth
 		$this->minicurl->set_cookies('remixsid=' . $sid . '; path=/; domain=.vkontakte.ru');
 
 		return TRUE;
-	}
-
-	private function get_hash($page_id)
-	{
-		$result = $this->minicurl->get_file('http://vkontakte.ru/' . $page_id);
-
-		preg_match('#"post_hash":"([^"]+)"#isU', $result, $match);
-
-		if (strpos($result, 'action="https://login.vk.com/?act=login'))
-		{
-			unset($match[1]);
-		}
-
-		$this->sleep();
-		return ((isset($match[1])) ? $match[1] : '');
 	}
 
 	private function get_auth_location()
@@ -226,9 +192,29 @@ class vk_auth
 				substr($result, strpos($result, "setCookieEx('sid', '") + 20, 60));
 	}
 
+/*
+* private postiong functions
+*/
 
-	private function post_to_wall_query($post)
+	private function post_to_wall_query($hash, $to_id, $message, $official=FALSE, $friends_only=FALSE, $type='all')
 	{
+		$official = $official ? '1' : '';
+		$friends_only = $friends_only ? '1' : '';
+
+		$post = array(
+			'act' => 'post',
+			'al' => '1',
+			'facebook_export' => '',
+			'friends_only' => $friends_only,
+			'hash' => $hash,
+			'message' => $message,
+			'note_title' => '',
+			'official' => $official,
+			'status_export' => '',
+			'to_id' => $to_id,
+			'type' => $type,
+		);
+
 		$result = $this->minicurl->get_file('http://vkontakte.ru/al_wall.php', $post);
 
 		$this->sleep();
@@ -237,18 +223,31 @@ class vk_auth
 		return (isset($match[1]) AND ($match[1] == '0'));
 	}
 
+	private function get_hash($page_id)
+	{
+		$result = $this->minicurl->get_file('http://vkontakte.ru/' . $page_id);
+
+		preg_match('#"post_hash":"([^"]+)"#isU', $result, $match);
+
+		if (strpos($result, 'action="https://login.vk.com/?act=login'))
+		{
+			unset($match[1]);
+		}
+
+		$this->sleep();
+		return ((isset($match[1])) ? $match[1] : '');
+	}
+
+/*
+* private other functions
+*/
+
 	private function sleep()
 	{
 		if ($this->sleeptime)
 		{
 			sleep($this->sleeptime + rand(1, 4));
 		}
-	}
-
-	public function print_last_error()
-	{
-		$errors = array_reverse(file(LOG_FILE));
-		return '<b>Error!</b><br>' . $errors[0];
 	}
 
 	private function put_error_in_logfile($msg)

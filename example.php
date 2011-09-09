@@ -23,40 +23,43 @@ if(!$vk->check_auth())
 	exit();
 }
 
-$message = 'тестирование';
+$message = 'тестирование; testing';
 
-/*
-if (!$vk->post_to_user('137527963', $message)) {
-	echo $vk->print_last_error();
-	exit();
-}
-else
+
+if ($vk->post_to_user('137527963', $message)) 
 {
 	echo 'Posted in user page!';
 }
-*/
-
-
-/*
-if (!$vk->post_to_group('15014694', $message)) {
+else
+{
 	echo $vk->print_last_error();
 	exit();
 }
-else
+
+
+
+if ($vk->post_to_group('15014694', $message))
 {
 	echo 'Posted in group!';
 }
-*/
-
-
-/*
-if (!$vk->post_to_public_page('29986881', $message)) {
+else
+{
 	echo $vk->print_last_error();
 	exit();
 }
-else
+
+
+
+if ($vk->post_to_public_page('29986881', $message))
 {
 	echo 'Posted in public page!';
 }
-*/
+else
+{
+	echo $vk->print_last_error();
+	exit();
+}
+
+
+
 ?>
