@@ -2,15 +2,12 @@
 
 class vk_auth
 {
-	
+
 	private $email = '';
 	private $pwd = '';
 	private $sleeptime = 1;
 	private $minicurl;
 
-/*
-* public functions	
-*/
 
 	function __construct()
 	{
@@ -19,6 +16,10 @@ class vk_auth
 		$this->sleeptime = SLEEPTIME;
 		$this->minicurl = new minicurl(TRUE, COOKIES_FILE, 'Mozilla/5.0 (Windows NT 6.1; rv:2.0.1) Gecko/20100101 Firefox/4.0.1');
 	}
+
+/*
+* public auth functions
+*/
 
 	public function check_auth()
 	{
@@ -193,7 +194,7 @@ class vk_auth
 	}
 
 /*
-* private postiong functions
+* private posting functions
 */
 
 	private function post_to_wall_query($hash, $to_id, $message, $official=FALSE, $friends_only=FALSE, $type='all')

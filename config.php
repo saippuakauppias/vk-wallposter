@@ -1,8 +1,8 @@
 <?
 
 // VKontakte config
-define('VKEMAIL', 'm@example.com');		// vk public page admin email/login
-define('VKPWD', 'password');			// vk public page admin password
+define('VKEMAIL', 'login');				// vk admin email/login
+define('VKPWD', 'password');			// vk admin password
 
 // Other config
 define('SLEEPTIME', 2);					// in seconds; +rand(1, 4) if this var != 0
