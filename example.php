@@ -13,10 +13,9 @@ define('SCR_DIR', dirname(__FILE__));
 
 include_once(SCR_DIR . '/config.php');
 include_once(SCR_DIR . '/classes/minicurl.class.php');
-include_once(SCR_DIR . '/classes/vk_auth.class.php');
+include_once(SCR_DIR . '/classes/vk_poster.class.php');
 
-
-$vk = new vk_auth($VKEMAIL, $VKPWD, $VKPPID, $SLEEPTIME);
+$vk = new vk_auth();
 
 if(!$vk->check_auth())
 {
@@ -26,7 +25,7 @@ if(!$vk->check_auth())
 
 $message = 'test message';
 
-if (!$vk->post_to_wall($message)) {
+if (!$vk->post_to_user('', $message)) {
 	echo $vk->print_last_error();
 	exit();
 }
@@ -35,4 +34,7 @@ else
 	echo 'Posted!';
 }
 
+
+
+// TODO: прикрепление файлов к сообщениям
 ?>
