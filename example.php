@@ -23,10 +23,10 @@ if(!$vk->check_auth())
 	exit();
 }
 
-$message = 'test message';
+$message = 'тестирование';
 
 /*
-if (!$vk->post_to_user('1', $message)) {
+if (!$vk->post_to_user('137527963', $message)) {
 	echo $vk->print_last_error();
 	exit();
 }
@@ -37,6 +37,7 @@ else
 */
 
 
+/*
 if (!$vk->post_to_group('15014694', $message)) {
 	echo $vk->print_last_error();
 	exit();
@@ -45,8 +46,17 @@ else
 {
 	echo 'Posted in group!';
 }
+*/
 
 
-
-// TODO: прикрепление файлов к сообщениям
+/*
+if (!$vk->post_to_public_page('29986881', $message)) {
+	echo $vk->print_last_error();
+	exit();
+}
+else
+{
+	echo 'Posted in public page!';
+}
+*/
 ?>

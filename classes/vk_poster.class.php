@@ -34,8 +34,7 @@ class vk_auth
 	public function post_to_user($user_id, $message, $friends_only = '')
 	{
 		// check_auth() - так ли тут нужно? по-моему, нет
-		// act=post&al=1&attach1=1_1&attach1_type=photo&facebook_export=&friends_only=&hash=1&message=test&note_title=&official=&status_export=&to_id=1&type=all
-
+		
 		if (!is_numeric($user_id))
 		{
 			$this->put_error_in_logfile('$user_id - only numbers!');
@@ -74,9 +73,6 @@ class vk_auth
 
 	public function post_to_group($group_id, $message, $official = FALSE)
 	{
-// club16153068
-// admin act=post&al=1&facebook_export=&friends_only=&hash=00cbb6eaa0b44a3843&message=test&note_title=&official=1&status_export=&to_id=-15014694&type=all
-
 		if (!is_numeric($group_id))
 		{
 			$this->put_error_in_logfile('$group_id - only numbers!');
@@ -117,6 +113,19 @@ class vk_auth
 
 	public function post_to_public_page($page_id, $message)
 	{
+		if (!is_numeric($page_id))
+		{
+			$this->put_error_in_logfile('$page_id - only numbers!');
+			return FALSE;
+		}
+
+		$hash = $this->get_hash('public' . $page_id);
+		if (empty($hash))
+		{
+			$this->put_error_in_logfile('JS-Field "post_hash" not found!');
+			return FALSE;
+		}
+
 		$post = array(
 			'act' => 'post',
 			'al' => '1',
@@ -127,9 +136,17 @@ class vk_auth
 			'note_title' => '',
 			'official' => '',
 			'status_export' => '',
-			'to_id' => '-' . $page_id, //!!!!!!
-			'type' => 'all', // own |
+			'to_id' => '-' . $page_id,
+			'type' => 'all',
 		);
+
+		if(!$this->post_to_wall_query($post))
+		{
+			$this->put_error_in_logfile('Message not posted!');
+			return FALSE;
+		}
+
+		return TRUE;
 	}
 
 	private function need_auth()
