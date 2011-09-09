@@ -25,13 +25,25 @@ if(!$vk->check_auth())
 
 $message = 'test message';
 
-if (!$vk->post_to_user('', $message)) {
+/*
+if (!$vk->post_to_user('1', $message)) {
 	echo $vk->print_last_error();
 	exit();
 }
 else
 {
-	echo 'Posted!';
+	echo 'Posted in user page!';
+}
+*/
+
+
+if (!$vk->post_to_group('15014694', $message)) {
+	echo $vk->print_last_error();
+	exit();
+}
+else
+{
+	echo 'Posted in group!';
 }
 
 

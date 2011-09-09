@@ -72,11 +72,47 @@ class vk_auth
 		return TRUE;
 	}
 
-	public function post_to_group($group_id, $message, $official = '')
+	public function post_to_group($group_id, $message, $official = FALSE)
 	{
-// act=post&al=1&facebook_export=&friends_only=&hash=e7c66a3e49eb5d5744&message=test&note_title=&official=&status_export=&to_id=-16153068&type=all
 // club16153068
 // admin act=post&al=1&facebook_export=&friends_only=&hash=00cbb6eaa0b44a3843&message=test&note_title=&official=1&status_export=&to_id=-15014694&type=all
+
+		if (!is_numeric($group_id))
+		{
+			$this->put_error_in_logfile('$group_id - only numbers!');
+			return FALSE;
+		}
+
+		$hash = $this->get_hash('club' . $group_id);
+		if (empty($hash))
+		{
+			$this->put_error_in_logfile('JS-Field "post_hash" not found!');
+			return FALSE;
+		}
+
+		$official = $official ? '1' : '';
+
+		$post = array(
+			'act' => 'post',
+			'al' => '1',
+			'facebook_export' => '',
+			'friends_only' => '',
+			'hash' => $hash,
+			'message' => $message,
+			'note_title' => '',
+			'official' => $official,
+			'status_export' => '',
+			'to_id' => '-' . $group_id,
+			'type' => 'all',
+		);
+
+		if(!$this->post_to_wall_query($post))
+		{
+			$this->put_error_in_logfile('Message not posted!');
+			return FALSE;
+		}
+
+		return TRUE;
 	}
 
 	public function post_to_public_page($page_id, $message)
