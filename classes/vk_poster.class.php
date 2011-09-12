@@ -5,6 +5,7 @@ class vk_auth
 
 	private $email = '';
 	private $pwd = '';
+	private $phone = '';
 	private $sleeptime = 1;
 	private $minicurl;
 
@@ -13,6 +14,7 @@ class vk_auth
 	{
 		$this->email = VKEMAIL;
 		$this->pwd = VKPWD;
+		$this->phone = VKPHONE;
 		$this->sleeptime = SLEEPTIME;
 		$this->minicurl = new minicurl(TRUE, COOKIES_FILE, 'Mozilla/5.0 (Windows NT 6.1; rv:2.0.1) Gecko/20100101 Firefox/4.0.1');
 	}
@@ -23,6 +25,12 @@ class vk_auth
 
 	public function check_auth()
 	{
+		if (strlen($this->phone) != 4)
+		{
+			$this->put_error_in_logfile('4 LAST DIGITS from phone!!!');
+			exit();
+		}
+
 		if($this->need_auth())
 		{
 			if(!$this->auth())
@@ -227,7 +235,39 @@ class vk_auth
 	private function get_hash($page_id)
 	{
 		$result = $this->minicurl->get_file('http://vkontakte.ru/' . $page_id);
+		$this->sleep();
 
+		preg_match('#Location\: ([^\r\n]+)#is', $result, $match);
+        if (isset($match[1]) AND !empty($match[1]))
+        {
+        	$result = $this->minicurl->get_file('http://vkontakte.ru' . $match[1]);
+			$this->sleep();
+			unset($match);
+
+			preg_match("#act: '([^']+)', code: ge\('code'\)\.value, to: '([^']+)', al_page: '([^']+)', hash: '([^']+)'#is", $result, $match);
+
+			$post = array(
+				'act' => $match[1],
+				'al' => '1', // хз что это
+				'al_page' => $match[3],
+				'code' => $this->phone,
+				'hash' => $match[4],
+				'to' => $match[2]
+			);
+
+			$result = $this->minicurl->get_file('http://vkontakte.ru/login.php', $post);
+			$this->sleep();
+			unset($match);
+
+			preg_match('#>/([a-z0-9\.\-_]+)<#is', $result, $match);
+
+			if (isset($match[1]) AND !empty($match[1]))
+			{
+				$result = $this->minicurl->get_file('http://vkontakte.ru/' . $match[1]);
+				$this->sleep();
+				unset($match);
+			}
+        }
 		preg_match('#"post_hash":"([^"]+)"#isU', $result, $match);
 
 		if (strpos($result, 'action="https://login.vk.com/?act=login'))
@@ -235,8 +275,7 @@ class vk_auth
 			unset($match[1]);
 		}
 
-		$this->sleep();
-		return ((isset($match[1])) ? $match[1] : '');
+		return (isset($match[1]) ? $match[1] : '');
 	}
 
 /*
