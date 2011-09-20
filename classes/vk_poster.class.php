@@ -131,6 +131,11 @@ class vk_auth
 
 	public function print_last_error()
 	{
+        if (defined('DEBUG') AND (DEBUG == TRUE))
+        {
+                var_dump($self->minicurl->debug_pages());
+        }
+        
 		$errors = array_reverse(file(LOG_FILE));
 		return '<b>Error!</b><br>' . $errors[0];
 	}
