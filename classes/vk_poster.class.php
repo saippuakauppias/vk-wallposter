@@ -249,7 +249,7 @@ class vk_auth
 			$this->sleep();
 			unset($match);
 
-			preg_match("#act: '([^']+)', code: ge\('code'\)\.value, to: '([^']+)', al_page: '([^']+)', hash: '([^']+)'#is", $result, $match);
+			preg_match("#act: '([^']+)', code: ge\('code'\)\.value, to: '([^']+)', al_page: '([^']*)', hash: '([^']+)'#i", $result, $match);
 
 			$post = array(
 				'act' => $match[1],
