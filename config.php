@@ -9,7 +9,8 @@ define('VKPHONE', '1234');				// FOURTH (4!!!) LAST digits from phone
 define('SLEEPTIME', 2);					// in seconds; +rand(1, 4) if this var != 0
 
 // Files config
-define('COOKIES_FILE', SCR_DIR . '/data/cookies.txt');		// cookies
-define('LOG_FILE', SCR_DIR . '/data/logfile.txt');			// log
+define('DATA_DIR', SCR_DIR . '/data');
+define('COOKIES_FILE', DATA_DIR . '/cookies.txt');		// cookies
+define('LOG_FILE', DATA_DIR . '/logfile.txt');			// log
 
 ?>

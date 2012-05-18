@@ -8,6 +8,7 @@ class vk_auth
 	private $phone = '';
 	private $sleeptime = 1;
 	private $minicurl;
+	private $images = array();
 
 
 	function __construct()
@@ -44,6 +45,36 @@ class vk_auth
 	}
 
 /*
+* public attach to post functions
+*/
+	public function attach_photos($photos=array())
+	{
+		if (sizeof($photos) <= 0)
+		{
+			$this->put_error_in_logfile('Photo links not found!');
+			return FALSE;
+		}
+
+		if (is_array($photos))
+		{
+			foreach ($photos as $url)
+			{
+				$this->images[] = $url;
+			}
+		} 
+		elseif (is_string($photos)) 
+		{
+			$this->images[] = $photos;
+		}
+		else {
+			$this->put_error_in_logfile('Var not array or string!');
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+/*
 * public posting functions 
 */
 
@@ -57,7 +88,8 @@ class vk_auth
 			return FALSE;
 		}
 
-		$hash = $this->get_hash('id' . $user_id);
+		$user_id = 'id' . $user_id;
+		$hash = $this->get_hash($user_id);
 		if (empty($hash))
 		{
 			$this->put_error_in_logfile('JS-Field "post_hash" not found!');
@@ -81,7 +113,8 @@ class vk_auth
 			return FALSE;
 		}
 
-		$hash = $this->get_hash('club' . $group_id);
+		$group_id = 'club' . $group_id;
+		$hash = $this->get_hash($group_id);
 		if (empty($hash))
 		{
 			$this->put_error_in_logfile('JS-Field "post_hash" not found!');
@@ -107,7 +140,8 @@ class vk_auth
 			return FALSE;
 		}
 
-		$hash = $this->get_hash('public' . $page_id);
+		$page_id = 'public' . $page_id;
+		$hash = $this->get_hash($page_id);
 		if (empty($hash))
 		{
 			$this->put_error_in_logfile('JS-Field "post_hash" not found!');
@@ -210,6 +244,8 @@ class vk_auth
 		$official = $official ? '1' : '';
 		$friends_only = $friends_only ? '1' : '';
 
+		$to_id_post = str_replace(array('id', 'public', 'club'), '', $to_id);
+
 		$post = array(
 			'act' => 'post',
 			'al' => '1',
@@ -220,9 +256,14 @@ class vk_auth
 			'note_title' => '',
 			'official' => $official,
 			'status_export' => '',
-			'to_id' => $to_id,
+			'to_id' => $to_id_post,
 			'type' => $type,
 		);
+
+		if(sizeof($this->images))
+		{
+			$photos_attach = $this->load_photos($to_id);
+		}
 
 		$result = $this->minicurl->get_file('http://vkontakte.ru/al_wall.php', $post);
 
@@ -276,6 +317,62 @@ class vk_auth
 		}
 
 		return (isset($match[1]) ? $match[1] : '');
+	}
+
+/*
+* private attach functions
+*/
+
+	private function load_photos($to_id)
+	{
+		$result = $this->minicurl->get_file('http://vkontakte.ru/' . $to_id);
+		$this->sleep();
+
+		preg_match('#"upload":\{"url":"([^"]+)","params":\{"act":"([^"]+)","aid":([^"]+),"gid":([^"]+),"mid":([^"]+),"hash":"([^"]+)","rhash":"([^"]+)","vk":"([^"]*)","from_host":"([^"]+)"},"opts":\{"server":"([^"]+)","default_error"#isU', $result, $match);
+
+		$url = str_replace('\\', '', $match[1]);
+		$server = $match[10];
+
+		$get_params = array(
+			'act' => $match[2],
+			'aid' => $match[3],
+			'ajx' => '1',
+			'gid' => $match[4],
+			'mid' => $match[5],
+			'hash' => $match[6],
+			'rhash' => $match[7],
+			'vk' => $match[8],
+			'from_host' => $match[9]
+		);
+
+		$url .= '?' . http_build_query($get_params);
+
+		$vkimages = array();
+		foreach($this->images as $url)
+		{
+			$imgdata = file_get_contents($url);
+			$imgformat = end(explode('.', $url));
+			$imgfilename = DATA_DIR . '/' . rand(199122, 1992314) . '.' . $imgformat;
+			$imghandle = fopen($imgfilename, 'w');
+			fwrite($imghandle, $imgdata);
+			fclose($imghandle);
+
+			$post = array(
+				'photo' => '@' . $imgfilename . ';type=image/' . $imgformat
+			);
+
+			$result = $this->minicurl->get_file($url, $post);
+			$this->sleep();
+
+			preg_match('#mid=([^&]+)&aid=([^&]+)&gid=([^&]+)&server=([^&]+)&photos=([^&]+)&hash=([^&]+)#isU', $result, $match);
+
+
+			var_dump($result);
+
+			unlink($imgfilename);
+			exit;
+		}
+		return $vkimages;
 	}
 
 /*

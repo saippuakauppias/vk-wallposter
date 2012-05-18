@@ -28,6 +28,16 @@ else
 	exit();
 }
 
+// добавление изображений к сообщению
+if(!$vk->attach_photos(array(
+	'http://company.yandex.ru/i/kr7.jpg', 
+	'http://company.yandex.ru/i/datacenters/_MG_3279.jpg'
+)))
+{
+	echo $vk->print_last_error();
+	exit();
+}
+
 // сообщение для публикации (обязательно в UTF-8)
 $message = 'тестирование; testing';
 
