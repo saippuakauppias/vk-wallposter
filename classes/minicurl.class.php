@@ -12,6 +12,7 @@ class minicurl
 	private $user_agent = FALSE;
 	private $referer = FALSE;
 	private $postfields = FALSE;
+    private $debug_pages = array();
 
 
 	function __construct($headers, $cookies_file, $user_agent, $proxy = FALSE,
@@ -54,6 +55,11 @@ class minicurl
 
 		$this->cookies = '';
 	}
+    
+    public function debug_pages()
+    {
+        return $self->debug_pages;
+    }
 
 	private function cURL_get_file($url) 
 	{
@@ -105,6 +111,11 @@ class minicurl
 
 		$result = curl_exec($ch);
 		$error = curl_errno($ch);
+        
+        if (defined('DEBUG') AND (DEBUG == TRUE))
+        {
+            $self->debug_pages[$url] = $result;
+        }
 
 		if ($error != '0') {
 			// TODO: add exceptions

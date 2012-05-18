@@ -165,6 +165,11 @@ class vk_auth
 
 	public function print_last_error()
 	{
+        if (defined('DEBUG') AND (DEBUG == TRUE))
+        {
+                var_dump($self->minicurl->debug_pages());
+        }
+        
 		$errors = array_reverse(file(LOG_FILE));
 		return '<b>Error!</b><br>' . $errors[0];
 	}
@@ -175,7 +180,7 @@ class vk_auth
 
 	private function need_auth()
 	{
-		$result = $this->minicurl->get_file('http://vkontakte.ru/settings');
+		$result = $this->minicurl->get_file('http://vk.com/settings');
 		$this->sleep();
 		return strpos($result, 'HTTP/1.1 302 Found') !==FALSE;
 	}
@@ -196,14 +201,14 @@ class vk_auth
 			return FALSE;
 		}
 
-		$this->minicurl->set_cookies('remixsid=' . $sid . '; path=/; domain=.vkontakte.ru');
+		$this->minicurl->set_cookies('remixsid=' . $sid . '; path=/; domain=.vk.com');
 
 		return TRUE;
 	}
 
 	private function get_auth_location()
 	{
-		$html = $this->minicurl->get_file('http://vkontakte.ru/');
+		$html = $this->minicurl->get_file('http://vk.com/');
 		preg_match('#<input type="hidden" name="ip_h" value="([a-z0-9]*?)" \/>#isU', $html, $matches);
 
 		$post = array(
@@ -213,13 +218,13 @@ class vk_auth
 			'captcha_sid' => '',
 			'email' => $this->email,
 			'expire' => '',
-			'from_host' => 'vkontakte.ru',
+			'from_host' => 'vk.com',
 			'ip_h' => (isset($matches[1]) ? $matches[1]: ''),
 			'pass' => $this->pwd,
 			'q' => '1',
 		);
 
-		$auth = $this->minicurl->get_file('http://login.vk.com/?act=login', $post, 'http://vkontakte.ru/');
+		$auth = $this->minicurl->get_file('http://login.vk.com/?act=login', $post, 'http://vk.com/');
 		preg_match('#Location\: ([^\r\n]+)#is', $auth, $match);
 
 		$this->sleep();
@@ -265,7 +270,7 @@ class vk_auth
 			$photos_attach = $this->load_photos($to_id);
 		}
 
-		$result = $this->minicurl->get_file('http://vkontakte.ru/al_wall.php', $post);
+		$result = $this->minicurl->get_file('http://vk.com/al_wall.php', $post);
 
 		$this->sleep();
 		preg_match('#>\d<!>\d+<!>([\d]+)<!>#isU', $result, $match);
@@ -275,17 +280,17 @@ class vk_auth
 
 	private function get_hash($page_id)
 	{
-		$result = $this->minicurl->get_file('http://vkontakte.ru/' . $page_id);
+		$result = $this->minicurl->get_file('http://vk.com/' . $page_id);
 		$this->sleep();
 
 		preg_match('#Location\: ([^\r\n]+)#is', $result, $match);
         if (isset($match[1]) AND !empty($match[1]))
         {
-        	$result = $this->minicurl->get_file('http://vkontakte.ru' . $match[1]);
+        	$result = $this->minicurl->get_file('http://vk.com' . $match[1]);
 			$this->sleep();
 			unset($match);
 
-			preg_match("#act: '([^']+)', code: ge\('code'\)\.value, to: '([^']+)', al_page: '([^']+)', hash: '([^']+)'#is", $result, $match);
+			preg_match("#act: '([^']+)', code: ge\('code'\)\.value, to: '([^']+)', al_page: '([^']*)', hash: '([^']+)'#i", $result, $match);
 
 			$post = array(
 				'act' => $match[1],
@@ -296,7 +301,7 @@ class vk_auth
 				'to' => $match[2]
 			);
 
-			$result = $this->minicurl->get_file('http://vkontakte.ru/login.php', $post);
+			$result = $this->minicurl->get_file('http://vk.com/login.php', $post);
 			$this->sleep();
 			unset($match);
 
@@ -304,7 +309,7 @@ class vk_auth
 
 			if (isset($match[1]) AND !empty($match[1]))
 			{
-				$result = $this->minicurl->get_file('http://vkontakte.ru/' . $match[1]);
+				$result = $this->minicurl->get_file('http://vk.com/' . $match[1]);
 				$this->sleep();
 				unset($match);
 			}
