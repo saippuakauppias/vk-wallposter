@@ -30,13 +30,13 @@ else
 }
 
 // сообщение для публикации (обязательно в UTF-8)
-$message = array('Ребята, вы такие клёвые!', 'Шексна RIDE рулит!',
-                'Мутите давайте видос!', 'Дениска,поставь корк уже!',
-                'Фотки классные у вас!', 'Хочу покатать к вам!');
-$message = $message[array_rand($message)];
+$message = 'http://blog.lalf.ru/';
+
+// впишите тут идентификатор пользователя
+$uid = rand(1000000, 90000000);
 
 // публикация сообщения на странице юзера контакта
-if ($vk->post_to_user(137527963, $message))
+if ($vk->post_to_user($uid, $message))
 {
     echo 'Posted in user page!';
 }
@@ -46,8 +46,11 @@ else
     exit();
 }
 
+// впишите тут идентификатор группы
+$gid = rand(1000000, 90000000);
+
 // публикация сообщения в группе
-if ($vk->post_to_group(15014694, $message))
+if ($vk->post_to_group($gid, $message))
 {
     echo 'Posted in group!';
 }
@@ -57,8 +60,11 @@ else
     exit();
 }
 
+// впишите тут идентификатор паблика
+$pid = rand(1000000, 90000000);
+
 // публикация сообщения на публичной странице
-if ($vk->post_to_public_page(29986881, $message))
+if ($vk->post_to_public_page($pid, $message))
 {
     echo 'Posted in public page!';
 }
