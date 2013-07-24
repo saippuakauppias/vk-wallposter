@@ -5,6 +5,7 @@ ini_set('display_errors', TRUE);
 @set_time_limit(0);
 @ini_set('max_execution_time',0);
 @ini_set('set_time_limit',0);
+
 header('Content-Type: text/html; charset=utf-8');
 @ob_end_flush();
 
@@ -66,6 +67,5 @@ else
     echo $vk->print_last_error();
     exit();
 }
-
 
 ?>

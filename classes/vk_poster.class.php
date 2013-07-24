@@ -47,7 +47,7 @@ class vk_auth
 * public posting functions
 */
 
-    public function post_to_user($user_id, $message, $friends_only = FALSE)
+    public function post_to_user($user_id, $message, $friends_only=FALSE)
     {
         // check_auth() - так ли тут нужно? по-моему, нет
 
@@ -73,7 +73,7 @@ class vk_auth
         return TRUE;
     }
 
-    public function post_to_group($group_id, $message, $official = FALSE)
+    public function post_to_group($group_id, $message, $official=FALSE)
     {
         if (!is_numeric($group_id))
         {
@@ -148,7 +148,7 @@ class vk_auth
     {
         $result = $this->minicurl->get_file('http://vk.com/settings');
         $this->sleep();
-        return strpos($result, 'HTTP/1.1 302 Found') !==FALSE;
+        return strpos($result, 'HTTP/1.1 302 Found') !== FALSE;
     }
 
     private function auth()

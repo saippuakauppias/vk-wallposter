@@ -15,8 +15,8 @@ class minicurl
     private $debug_pages = array();
 
 
-    function __construct($headers, $cookies_file, $user_agent, $proxy = FALSE,
-                         $proxy_port = FALSE, $proxy_type = FALSE)
+    function __construct($headers, $cookies_file, $user_agent, $proxy=FALSE,
+                         $proxy_port=FALSE, $proxy_type=FALSE)
     {
         $this->headers = $headers;
         $this->cookies_file = $cookies_file;
@@ -35,7 +35,7 @@ class minicurl
         }
     }
 
-    public function get_file($url, $postfields = FALSE, $referer = FALSE)
+    public function get_file($url, $postfields=FALSE, $referer=FALSE)
     {
         $this->referer = $referer;
         $this->postfields = (is_array($postfields) ? http_build_query($postfields) : $postfields);
